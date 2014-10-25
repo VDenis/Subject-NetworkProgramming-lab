@@ -1,0 +1,16 @@
+{% if user.is_authenticated %}
+
+{% block body_block %}
+    <h1>Студенты</h1>
+    {% for student in object_list %}
+        <p>{{ student.group }}</p>
+        <h2><a href=" {% url 'lab:student' student.id %} ">{{ student.full_name }}</a></h2>
+        <p>{{ student.record_book }}</p>
+    {% empty %}
+    <p>Нет студентов</p>
+    {% endfor %}
+{% endblock %}
+
+
+{% endif %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>

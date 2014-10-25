@@ -1,0 +1,39 @@
+{% if user.is_authenticated %}
+
+
+<h1>Сделанные лабораторные работы</h1>
+<ul>
+{% for made in madeLaboratoryWork_list %}
+    <li>
+        Студент: {{ made.student }} | оценка: {{ made.mark }} | 
+        {{ made.date }}
+
+    </li>
+{% empty %}
+<p>Нет сданных лаборатоных работ</p>    
+{% endfor %}
+</ul>
+
+
+
+    <h1>Загрузка</h1>
+    <form action="#" method="post" enctype="multipart/form-data">
+        {% csrf_token %} {{form}}
+        <input type="submit" value="Upload" />
+    </form>
+    {% for file in files %}
+        {{forloop.counter}}.<a href="{% if file.upload_file %} {{ file.upload_file.url }} {% endif %}">{{ file.upload_file.name }}</a>
+        ({{file.student}}) |     <g:hangout render="createhangout"
+        invites="[{ id : '{{ file.student.user.email }}', invite_type : 'EMAIL' }]">
+    </g:hangout>
+    | {{ file.student.user.email }} <hr />
+    {% endfor %}
+    
+
+
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    
+{% else %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>
+{% endif %}

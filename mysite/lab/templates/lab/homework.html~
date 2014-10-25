@@ -1,0 +1,17 @@
+{% if user.is_authenticated %}
+
+<h1>Лабораторные работы</h1>
+<ul>
+{% for laboratory in pageLaboratoryWork_list %}
+    <li>
+        Предмет: {{ laboratory.subject.name }} | Преподаватель: {{ laboratory.subject.professor.user.first_name }} | 
+        {{ laboratory.description }} | {{ laboratory.name }}
+
+    </li>
+{% empty %}
+<p>Нет лаборатоной работы</p>    
+{% endfor %}
+</ul>
+
+{% endif %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>

@@ -1,0 +1,15 @@
+{% if user.is_authenticated %}
+
+{% block content %}
+    <h1>Группы</h1>
+    {% for group in object_list %}
+        <p>{{ group.identification }}</p>
+        <p>{{ group.name }}</p>
+    {% empty %}
+    <p>Нет групп</p>
+    {% endfor %}
+
+{% endblock %}
+
+{% endif %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>

@@ -1,0 +1,32 @@
+{% comment %}
+<ul>
+{% for group in group_list %}
+    <li>
+        Группа: {{ group.name }}
+        
+    </li>
+{% endfor %}
+</ul>
+<br><br>
+{% endcomment %}
+
+
+{% if user.is_authenticated %}
+
+<h1>Расписание</h1>
+<ul>
+{% for subject in subject_list %}
+    <li>
+        Предмет: {{ subject.name }} | <a href="{% url 'lab:homework' subject.id %}">link</a> | Преподаватель: {{ subject.professor.user.first_name }} | 
+        {% for group in subject.group.all %}
+            {{ group }}<br>        
+        {% endfor %}
+    </li>
+{% empty %}
+<p>Нет предметов</p>    
+{% endfor %}
+</ul>
+
+{% else %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>
+{% endif %}

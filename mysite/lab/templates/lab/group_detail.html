@@ -1,0 +1,10 @@
+{% if user.is_authenticated %}
+
+{% block content %}
+    <p>{{ group.identification }}</p>
+    <h2>{{ group.name }}</h2>
+{% endblock %}
+
+{% else %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>
+{% endif %}

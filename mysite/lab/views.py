@@ -1,0 +1,204 @@
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseRedirect, HttpResponse
+
+from lab.models import UploadFormMLW
+from django.views.generic import ListView, DetailView
+from lab.models import Student, Professor, Subject, Group, PageLaboratoryWork, MadeLaboratoryWork
+from lab.forms import UserForm, ProfessorProfileForm
+
+
+def index(request):
+    return render(request, 'lab/index.html')
+    
+def startpage(request):
+    return HttpResponse("Hello, world. You're at the lab startpage.")
+ 
+def professor(request, professor_id):
+    return HttpResponse("You're looking at professor %s." % professor_id)
+
+def student(request, student_id):
+    response = "You're looking at the student %s."
+    return HttpResponse(response % student_id)
+
+def group(request, group_id):
+    return HttpResponse("You're looking at the group %s." % group_id)
+
+def schedule(request):
+    professor_list = Professor.objects.all
+    #subject_list = Subject.objects.all
+    subject_list = Subject.objects.order_by('name')
+    group_list = Group.objects.all
+    context = {'professor_list': professor_list, 'subject_list': subject_list, 'group_list': group_list}
+    return render(request, 'lab/schedule.html', context)
+
+def homework(request, subject_id):
+    professor_list = Professor.objects.all
+    #subject_list = Subject.objects.all
+    subject_list = Subject.objects.order_by('name')
+    group_list = Group.objects.all
+    #pageLaboratoryWork_list = PageLaboratoryWork.objects.all
+    pageLaboratoryWork_list = PageLaboratoryWork.objects.filter(subject=subject_id)
+    madeLaboratoryWork_list = MadeLaboratoryWork.objects.all
+    context = {'professor_list': professor_list, 'subject_list': subject_list, 'group_list': group_list, 'pageLaboratoryWork_list': pageLaboratoryWork_list, 'madeLaboratoryWork_list': madeLaboratoryWork_list}
+    return render(request, 'lab/homework.html', context)    
+   
+def lab_results(request, lab_id):
+    if request.method=="POST":
+        upload_file = UploadFormMLW(request.POST, request.FILES)       
+        if upload_file.is_valid():
+            upload_file.save()  
+            return HttpResponseRedirect(reverse('fileupload'))
+    else:
+        upload_file=UploadFormMLW()
+    files=MadeLaboratoryWork.objects.all()
+    
+    professor_list = Professor.objects.all
+    #subject_list = Subject.objects.all
+    subject_list = Subject.objects.order_by('name')
+    group_list = Group.objects.all
+    #pageLaboratoryWork_list = PageLaboratoryWork.objects.all
+    pageLaboratoryWork_list = PageLaboratoryWork.objects.all
+    madeLaboratoryWork_list = MadeLaboratoryWork.objects.filter(page_laboratory_work=lab_id)
+    context = {'professor_list': professor_list, 'subject_list': subject_list, 'group_list': group_list, 'pageLaboratoryWork_list': pageLaboratoryWork_list, 'madeLaboratoryWork_list': madeLaboratoryWork_list, 'form':upload_file,'files':files}
+        
+    return render(request,'lab/result.html', context)
+'''
+    professor_list = Professor.objects.all
+    #subject_list = Subject.objects.all
+    subject_list = Subject.objects.order_by('name')
+    group_list = Group.objects.all
+    #pageLaboratoryWork_list = PageLaboratoryWork.objects.all
+    pageLaboratoryWork_list = PageLaboratoryWork.objects.all
+    madeLaboratoryWork_list = MadeLaboratoryWork.objects.filter(page_laboratory_work=lab_id)
+    context = {'professor_list': professor_list, 'subject_list': subject_list, 'group_list': group_list, 'pageLaboratoryWork_list': pageLaboratoryWork_list, 'madeLaboratoryWork_list': madeLaboratoryWork_list}
+    return render(request, 'lab/result.html', context)
+ '''
+    
+def stud_results(request, stud_id):
+    professor_list = Professor.objects.all
+    #subject_list = Subject.objects.all
+    subject_list = Subject.objects.order_by('name')
+    group_list = Group.objects.all
+    #pageLaboratoryWork_list = PageLaboratoryWork.objects.all
+    pageLaboratoryWork_list = PageLaboratoryWork.objects.filter(subject=stud_id)
+    madeLaboratoryWork_list = MadeLaboratoryWork.objects.all
+    context = {'professor_list': professor_list, 'subject_list': subject_list, 'group_list': group_list, 'pageLaboratoryWork_list': pageLaboratoryWork_list, 'madeLaboratoryWork_list': madeLaboratoryWork_list}
+    return render(request, 'lab/student/result.html', context)       
+   
+class StudentListView(ListView):
+    model = Student
+
+class StudentDetailView(DetailView):
+    model = Student
+    
+class ProfessorListView(ListView):
+    model = Professor
+    
+class ProfessorDetailView(DetailView):
+    model = Professor   
+
+class GroupListView(ListView):
+    model = Group
+    
+class GroupDetailView(DetailView):
+    model = Group
+    
+'''    
+def professor_register(request):
+
+    # A boolean value for telling the template whether the registration was successful.
+    # Set to False initially. Code changes value to True when registration succeeds.
+    registered = False
+
+    # If it's a HTTP POST, we're interested in processing form data.
+    if request.method == 'POST':
+        # Attempt to grab information from the raw form information.
+        # Note that we make use of both UserForm and UserProfileForm.
+        user_form = UserForm(data=request.POST)
+        profile_form = ProfessorProfileForm(data=request.POST)
+
+        # If the two forms are valid...
+        if user_form.is_valid() and profile_form.is_valid():
+            # Save the user's form data to the database.
+            user = user_form.save()
+
+            # Now we hash the password with the set_password method.
+            # Once hashed, we can update the user object.
+            user.set_password(user.password)
+            user.save()
+
+            # Now sort out the UserProfile instance.
+            # Since we need to set the user attribute ourselves, we set commit=False.
+            # This delays saving the model until we're ready to avoid integrity problems.
+            profile = profile_form.save(commit=False)
+            profile.user = user
+
+            # Did the user provide a profile picture?
+            # If so, we need to get it from the input form and put it in the UserProfile model.
+            if 'picture' in request.FILES:
+                profile.picture = request.FILES['picture']
+
+            # Now we save the UserProfile model instance.
+            profile.save()
+
+            # Update our variable to tell the template registration was successful.
+            registered = True
+
+        # Invalid form or forms - mistakes or something else?
+        # Print problems to the terminal.
+        # They'll also be shown to the user.
+        else:
+            print user_form.errors, profile_form.errors
+
+    # Not a HTTP POST, so we render our form using two ModelForm instances.
+    # These forms will be blank, ready for user input.
+    else:
+        user_form = UserForm()
+        profile_form = ProfessorProfileForm()
+
+    # Render the template depending on the context.
+    return render(request,
+            'lab/register.html',
+            {'user_form': user_form, 'profile_form': profile_form, 'registered': registered} ) 
+            
+
+
+def professor_login(request):
+
+    # If the request is a HTTP POST, try to pull out the relevant information.
+    if request.method == 'POST':
+        # Gather the username and password provided by the user.
+        # This information is obtained from the login form.
+        username = request.POST['username']
+        password = request.POST['password']
+
+        # Use Django's machinery to attempt to see if the username/password
+        # combination is valid - a User object is returned if it is.
+        user = authenticate(username=username, password=password)
+
+        # If we have a User object, the details are correct.
+        # If None (Python's way of representing the absence of a value), no user
+        # with matching credentials was found.
+        if user:
+            # Is the account active? It could have been disabled.
+            if user.is_active:
+                # If the account is valid and active, we can log the user in.
+                # We'll send the user back to the homepage.
+                login(request, user)
+                return HttpResponseRedirect('/lab/')
+            else:
+                # An inactive account was used - no logging in!
+                return HttpResponse("Your Rango account is disabled.")
+        else:
+            # Bad login details were provided. So we can't log the user in.
+            print "Invalid login details: {0}, {1}".format(username, password)
+            return HttpResponse("Invalid login details supplied.")
+
+    # The request is not a HTTP POST, so display the login form.
+    # This scenario would most likely be a HTTP GET.
+    else:
+        # No context variables to pass to the template system, hence the
+        # blank dictionary object...
+        return render(request, 'lab/login.html', {})
+'''

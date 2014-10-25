@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+from django.db import models
+from django.contrib.auth.models import User
+from django.forms import ModelForm
+
+class People(models.Model):
+    user = models.OneToOneField(User)
+
+    #email = models.EmailField(max_length=75) # email
+    born = models.DateField() # born date
+    #name = models.CharField(max_length=20) # name
+    #surname = models.CharField(max_length=20) # surname
+    
+    class Meta:
+        abstract = True
+        
+class Professor(People): # Ingeritance
+    identification_card = models.CharField(max_length=75)
+    department = models.CharField(max_length=75)
+    
+    def __unicode__(self):
+        return self.user.first_name + ' ' + self.user.last_name
+
+    def full_name(self):
+        return self.__unicode__()
+
+    def get_absolute_url(self):
+        return "/professor/%i/" % self.id
+                
+class Group(models.Model):
+    identification = models.CharField(max_length=75)
+    name = models.CharField(max_length=75)
+    
+    def __unicode__(self):
+        return "Group:" + self.identification + ' ' + self.name
+
+    def get_absolute_url(self):
+        return "/group/%i/" % self.id         
+
+class Student(People): # Ingeritance
+    record_book = models.CharField(max_length=75) # students record book
+    group = models.ForeignKey(Group)
+    #group = models.CharField(max_length=75)
+    
+    def __unicode__(self):
+        #return "Student:%i" % self.id #self.user.name + ' ' + self.user.surname
+        return self.user.first_name + ' ' + self.user.last_name
+    
+    def full_name(self):
+        return self.__unicode__()
+    
+    def get_absolute_url(self):
+        return "/students/%i/" % self.id
+        
+class Subject(models.Model):
+    name = models.CharField(max_length=75) # subject name
+    professor = models.ForeignKey(Professor)
+    group = models.ManyToManyField(Group)
+    
+    def __unicode__(self):
+        return "Subject:" + self.name
+
+    def get_absolute_url(self):
+        return "/subject/%i/" % self.id   
+        
+class PageLaboratoryWork(models.Model):
+    name = models.CharField(max_length=200)
+    #date = models.DateTimeField()
+    date=models.DateTimeField(auto_now_add =True)
+    description = models.CharField(max_length=1000)
+    document = models.FileField("File", upload_to='documents', blank=True)
+    subject = models.ForeignKey(Subject) ###
+    
+    def __unicode__(self):
+        return "PageLaboratoryWork:" + self.name
+
+    def get_absolute_url(self):
+        return "/labwork/%i/" % self.id     
+
+class UploadFormPLW(ModelForm):
+    class Meta:
+        model = PageLaboratoryWork
+    
+class MadeLaboratoryWork(models.Model):
+    upload_file = models.FileField("File", upload_to='documents', blank=True)
+    #date = models.DateTimeField()
+    date=models.DateTimeField(auto_now_add =True)
+    mark = models.IntegerField(default=0)
+    student = models.ForeignKey(Student)
+    page_laboratory_work = models.ForeignKey(PageLaboratoryWork)
+    #comment = models.CharField(max_length=1000) ###
+
+    def __unicode__(self):
+        return "MadeLaboratoryWork: %i" % self.id
+
+    def get_absolute_url(self):
+        return "/madelabwork/%i/" % self.id  
+
+class UploadFormMLW(ModelForm):
+    class Meta:
+        model = MadeLaboratoryWork
+
+class Upload(models.Model):
+    file = models.FileField("File", upload_to="documents/")    
+    upload_date=models.DateTimeField(auto_now_add =True)
+
+# FileUpload form class.
+class UploadForm(ModelForm):
+    class Meta:
+        model = Upload
+
+class LabComment(models.Model):
+    date = models.DateTimeField()
+    comment = models.CharField(max_length=1000)
+    made_laboratory_work = models.ForeignKey(MadeLaboratoryWork)
+   
+    def __unicode__(self):
+        return "LabComment:" + self.id
+
+    def get_absolute_url(self):
+        return "/labcomment/%i/" % self.id      
+
+    

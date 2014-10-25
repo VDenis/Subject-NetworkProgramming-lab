@@ -1,0 +1,10 @@
+{% if user.is_authenticated %}
+
+{% block content %}
+    <p>{{ professor.full_name }}</p>
+    <h2>{{ post.department }}</h2>
+    <p>{{ post.identification_card }}</p>
+{% endblock %}
+
+{% endif %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>

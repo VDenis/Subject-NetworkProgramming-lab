@@ -1,0 +1,17 @@
+{% if user.is_authenticated %}
+
+{% block content %}
+    <h1>Преподаватели</h1>
+    {% for professor in object_list %}
+        <p>{{ professor.department }}</p>
+        <h2><a href=" {% url 'lab:professor' professor.id %} ">{{ professor.full_name }}</a></h2>
+        <p>{{ professor.identification_card }}</p>
+    {% empty %}
+    <p>Нет преподавателей</p>
+    {% endfor %}
+
+{% endblock %}
+
+{% else %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>
+{% endif %}

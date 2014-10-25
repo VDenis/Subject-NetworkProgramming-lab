@@ -1,0 +1,15 @@
+{% if user.is_authenticated %}
+
+{% block content %}
+    <p>{{ student.full_name }}</p>
+    <h2>{{ student.group }}</h2>
+    <p>{{ student.record_book }}</p>
+    <g:hangout render="createhangout"
+        invites="[{ id : '{{ file.student.user.email }}', invite_type : 'EMAIL' }]">
+    </g:hangout>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+{% endblock %}
+
+{% else %}
+<hi>Please login <a href="/accounts/login/">login</a> </h1>
+{% endif %}
